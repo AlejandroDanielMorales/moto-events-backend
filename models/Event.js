@@ -22,7 +22,6 @@ const EventSchema = new Schema({
     stops: [StopSchema],
 
     status: { type: String, enum: ['activo', 'cancelado', 'finalizado'], default: 'activo' },
-    createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     createdAt: { type: Date, default: Date.now }
 });
 

@@ -1,0 +1,16 @@
+-Falta definir modelo de registro : 
+
+-booleano si va con acompañante 
+
+-nombre de acompañante
+
+-falta definir en el registro de usuario : 
+
+-primer numero de emergencia
+
+-segundo numero de emergencia.
+-si se desea continuar con la idea de stops en los eventos, se requiere id de evento para relacionarlos al registrar un stop
+
+-faltan controladores de el modelo moto y que verifique el usuario antes de agregar por el token del login
+
+en los registros con imagenes el archivo imagen , que sus controladores admitan archivos y los guarden y los middlewares para que se accione al llamar sus endpoint
