@@ -5,6 +5,7 @@ const eventRoutes = require("./routes/eventRoutes");
 const stopRoutes = require("./routes/stopRoutes");
 const authRoutes = require("./routes/authRoutes");
 const registrationRoutes = require("./routes/registrationRoutes");
+const motoRoutes = require("./routes/motoRoutes");
 const userRoutes = require("./routes/userRoutes");
 const cors = require("cors");
 
@@ -25,6 +26,7 @@ app.use("/api/stops", stopRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/registrations", registrationRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/motos", motoRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log("Servidor en puerto " + PORT));

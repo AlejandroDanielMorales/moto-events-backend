@@ -1,74 +1,79 @@
-const Event = require("../models/Event");
 
-const createEvent = async (req, res) => {
-    try {
-        const event = await Event.create({ 
-            ...req.body, 
-            createdBy: req.user.id 
-        });
+const Stop = require("../models/Stop");
 
-        res.status(201).json(event);
-    } catch (error) {
-        res.status(400).json({ error: error.message });
-    }
+// CREATE STOP
+const createStop = async (req, res) => {
+  try {
+    const stop = await Stop.create(req.body);
+    res.status(201).json(stop);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
 };
 
-const getEvents = async (req, res) => {
-    try {
-        const events = await Event.find().populate("createdBy", "name");
-        res.json(events);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
+// GET ALL STOPS
+const getStops = async (req, res) => {
+  try {
+    const stops = await Stop.find();
+    res.json(stops);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 };
 
-// ADD STOP
-const addStop = async (req, res) => {
-    try {
-        const event = await Event.findById(req.params.eventId);
+// GET STOP BY ID
+const getStopById = async (req, res) => {
+  try {
+    const stop = await Stop.findById(req.params.stopId);
 
-        event.stops.push(req.body);
-        await event.save();
-
-        res.json(event);
-    } catch (error) {
-        res.status(400).json({ error: error.message });
+    if (!stop) {
+      return res.status(404).json({ msg: "Parada no encontrada" });
     }
+
+    res.json(stop);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
 };
 
 // UPDATE STOP
 const updateStop = async (req, res) => {
-    try {
-        const event = await Event.findById(req.params.eventId);
-        const stop = event.stops.id(req.params.stopId);
+  try {
+    const stop = await Stop.findByIdAndUpdate(
+      req.params.stopId,
+      { $set: req.body },
+      { new: true }
+    );
 
-        Object.assign(stop, req.body);
-        await event.save();
-
-        res.json(event);
-    } catch (error) {
-        res.status(400).json({ error: error.message });
+    if (!stop) {
+      return res.status(404).json({ msg: "Parada no encontrada" });
     }
+
+    res.json(stop);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
 };
 
 // DELETE STOP
 const deleteStop = async (req, res) => {
-    try {
-        const event = await Event.findById(req.params.eventId);
+  try {
+    const stop = await Stop.findByIdAndDelete(req.params.stopId);
 
-        event.stops.id(req.params.stopId).remove();
-        await event.save();
-
-        res.json(event);
-    } catch (error) {
-        res.status(400).json({ error: error.message });
+    if (!stop) {
+      return res.status(404).json({ msg: "Parada no encontrada" });
     }
+
+    res.json({ msg: "Parada eliminada correctamente" });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
 };
 
 module.exports = {
-    createEvent,
-    getEvents,
-    addStop,
-    updateStop,
-    deleteStop
+  createStop,
+  getStops,
+  getStopById,
+  updateStop,
+  deleteStop
 };

@@ -19,8 +19,10 @@ const EventSchema = new Schema({
     returnTime: Date,
 
     // PUNTOS INTERMEDIOS Y FINAL
-    stops: [StopSchema],
-
+  stops: [{
+    type: Schema.Types.ObjectId,
+    ref: "Stop"
+  }],
     status: { type: String, enum: ['activo', 'cancelado', 'finalizado'], default: 'activo' },
     createdAt: { type: Date, default: Date.now }
 });

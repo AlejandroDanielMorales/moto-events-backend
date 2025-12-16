@@ -4,36 +4,66 @@ const jwt = require("jsonwebtoken");
 
 const register = async (req, res) => {
   try {
-    const { name, email, password, phone, avatarUrl } = req.body;
+    const {
+      name,
+      email,
+      password,
+      phone,
+      emergencyContact1,
+      emergencyContact2
+    } = req.body;
 
     // Validación mínima
     if (!name || !email || !password) {
-      return res.status(400).json({ msg: "Nombre, email y contraseña son obligatorios." });
+      return res.status(400).json({
+        msg: "Nombre, email y contraseña son obligatorios."
+      });
     }
 
-    // Verificar si ya existe el email
-    const exists = await User.findOne({ email });
-    if (exists) return res.status(400).json({ msg: "El email ya está registrado." });
+    if (!emergencyContact1) {
+      return res.status(400).json({
+        msg: "El primer número de emergencia es obligatorio"
+      });
+    }
 
-    // Hash de la contraseña
-    const hashed = await bcrypt.hash(password, 10);
+    // Verificar email existente
+    const exists = await User.findOne({ email });
+    if (exists) {
+      return res.status(400).json({
+        msg: "El email ya está registrado."
+      });
+    }
+
+    // Hash de contraseña
+    const hashedPassword = await bcrypt.hash(password, 10);
 
     // Crear usuario
     const user = await User.create({
       name,
       email,
-      password: hashed,
-      phone: phone || null,
-      avatarUrl: avatarUrl || null,
-      role: "user"   // se fuerza por seguridad
+      password: hashedPassword,
+      phone,
+      emergencyContact1,
+      emergencyContact2
     });
 
-    return res.json({ msg: "Usuario registrado", user });
+    return res.status(201).json({
+      msg: "Usuario registrado correctamente",
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email
+      }
+    });
 
   } catch (err) {
-    return res.status(500).json({ msg: "Error en registro", err });
+    return res.status(500).json({
+      msg: "Error en registro",
+      error: err.message
+    });
   }
 };
+
 
 const login = async (req, res) => {
   try {
