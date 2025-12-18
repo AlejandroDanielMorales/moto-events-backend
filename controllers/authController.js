@@ -10,10 +10,12 @@ const register = async (req, res) => {
       password,
       phone,
       emergencyContact1,
-      emergencyContact2
+      emergencyContact2,
+      birthDate,
+      sex
     } = req.body;
 
-    // Validación mínima
+    // Validaciones
     if (!name || !email || !password) {
       return res.status(400).json({
         msg: "Nombre, email y contraseña son obligatorios."
@@ -23,6 +25,18 @@ const register = async (req, res) => {
     if (!emergencyContact1) {
       return res.status(400).json({
         msg: "El primer número de emergencia es obligatorio"
+      });
+    }
+
+    if (!birthDate || !sex) {
+      return res.status(400).json({
+        msg: "Fecha de nacimiento y sexo son obligatorios"
+      });
+    }
+
+    if (!["M", "F", "X"].includes(sex)) {
+      return res.status(400).json({
+        msg: "Sexo inválido. Use M, F o X"
       });
     }
 
@@ -44,7 +58,9 @@ const register = async (req, res) => {
       password: hashedPassword,
       phone,
       emergencyContact1,
-      emergencyContact2
+      emergencyContact2,
+      birthDate,
+      sex
     });
 
     return res.status(201).json({
