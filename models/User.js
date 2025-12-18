@@ -21,7 +21,7 @@ const UserSchema = new Schema({
 
     role: { 
         type: String, 
-        enum: ['admin','user'], 
+        enum: ['admin', 'user'], 
         default: 'user' 
     },
 
@@ -38,6 +38,19 @@ const UserSchema = new Schema({
         type: String 
     },
 
+    // 🆕 fecha de nacimiento
+    birthDate: {
+        type: Date,
+        required: true
+    },
+
+    // 🆕 sexo
+    sex: {
+        type: String,
+        enum: ['M', 'F', 'X'],
+        required: true
+    },
+
     createdAt: { 
         type: Date, 
         default: Date.now 
@@ -45,4 +58,3 @@ const UserSchema = new Schema({
 });
 
 module.exports = mongoose.model("User", UserSchema);
-

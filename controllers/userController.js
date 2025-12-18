@@ -20,7 +20,9 @@ async function updateMyProfile(req, res) {
             "phone",
             "avatarUrl",
             "emergencyContact1",
-            "emergencyContact2"
+            "emergencyContact2",
+            "birthDate",
+            "sex"
         ];
 
         const data = {};
@@ -31,11 +33,28 @@ async function updateMyProfile(req, res) {
             }
         });
 
-        // Validación mínima
+        // Validación emergency contact
         if ("emergencyContact1" in data && !data.emergencyContact1) {
             return res.status(400).json({
                 message: "El primer número de emergencia es obligatorio"
             });
+        }
+
+        // Validación sexo
+        if ("sex" in data && !["M", "F", "X"].includes(data.sex)) {
+            return res.status(400).json({
+                message: "El sexo debe ser M, F o X"
+            });
+        }
+
+        // Validación fecha de nacimiento
+        if ("birthDate" in data) {
+            const date = new Date(data.birthDate);
+            if (isNaN(date.getTime())) {
+                return res.status(400).json({
+                    message: "Fecha de nacimiento inválida"
+                });
+            }
         }
 
         const updatedUser = await User.findByIdAndUpdate(
@@ -76,6 +95,7 @@ async function deleteMyAccount(req, res) {
     }
 }
 
+// Obtener todos los usuarios (admin)
 async function getAllUsers(req, res) {
     try {
         const users = await User.find().select("-password");
@@ -84,18 +104,22 @@ async function getAllUsers(req, res) {
         res.status(500).json({ message: "Error al obtener usuarios" });
     }
 }
-const deleteUserById = async (req, res) => {
+
+// Eliminar usuario por ID (admin)
+async function deleteUserById(req, res) {
     try {
         const userId = req.params.userId;
         const deletedUser = await User.findByIdAndDelete(userId);
+
         if (!deletedUser) {
             return res.status(404).json({ message: "Usuario no encontrado" });
         }
+
         res.json({ message: "Usuario eliminado correctamente" });
     } catch (err) {
         res.status(500).json({ message: "Error al eliminar el usuario" });
     }
-};  
+}
 
 module.exports = {
     getMyProfile,
