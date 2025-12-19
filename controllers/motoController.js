@@ -123,8 +123,69 @@ async function deleteMoto(req, res) {
         res.status(500).json({ message: "Error al eliminar moto" });
     }
 }
+async function getAllMotos(req, res) {
+    try {
+        const motos = await Moto.find();    
+        res.json(motos);
+    } catch (err) {
+        res.status(500).json({ message: "Error al obtener motos" });
+    }
+}
+async function addMoto(req, res) {
+    try {
+        const {
+            owner, // 👈 opcional para dev
+            brand,
+            model,
+            photoUrl,
+            year,
+            displacementCc,
+            plate,
+            color
+        } = req.body;
+
+        if (!brand || !model) {
+            return res.status(400).json({
+                message: "Marca y modelo son obligatorios"
+            });
+        }
+
+        // 🔑 Resolver owner
+        const resolvedOwner = req.user?.id || owner;
+
+        if (!resolvedOwner) {
+            return res.status(400).json({
+                message: "Owner es obligatorio"
+            });
+        }
+
+        const moto = await Moto.create({
+            owner: resolvedOwner,
+            brand,
+            model,
+            photoUrl,
+            year,
+            displacementCc,
+            plate,
+            color
+        });
+
+        res.status(201).json(moto);
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({
+            message: "Error al crear moto",
+            error: err.message
+        });
+    }
+}
+
+
 
 module.exports = {
+    addMoto,
+    getAllMotos,
     createMoto,
     getMyMotos,
     getMotoById,
