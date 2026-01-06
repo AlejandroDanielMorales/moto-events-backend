@@ -15,8 +15,7 @@ async function createEvent(req, res) {
 
 async function getEvents(req, res) {
   const events = await Event.find()
-    .populate("stops")        // si tenés paradas
-    .populate("createdBy")    // opcional
+    .populate("stops") // opcional
     .sort({ date: 1 });
 
   return res.json(events);
@@ -24,8 +23,8 @@ async function getEvents(req, res) {
 
 async function getEvent(req, res) {
   const event = await Event.findById(req.params.id)
-    .populate("stops")
-    .populate("createdBy");
+    .populate("stops") // opcional
+    .sort({ date: 1 });
 
   return res.json(event);
 }
