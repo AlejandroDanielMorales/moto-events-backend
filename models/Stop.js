@@ -8,7 +8,7 @@ const StopSchema = new Schema({
     type: { type: String, enum: ["Point"], default: "Point" },
     coordinates: { type: [Number], required: true }
   },
-  description: String,
+  description: { type: String, required: true },
   createdAt: { type: Date, default: Date.now }
 });
 
