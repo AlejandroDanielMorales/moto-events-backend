@@ -11,6 +11,17 @@ const createStop = async (req, res) => {
   }
 };
 
+// POST /api/stops/bulk
+const createStopsBulk = async (req, res) => {
+  try {
+    const stops = await Stop.insertMany(req.body);
+    res.status(201).json(stops);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
+
 // GET ALL STOPS
 const getStops = async (req, res) => {
   try {
@@ -75,5 +86,6 @@ module.exports = {
   getStops,
   getStopById,
   updateStop,
-  deleteStop
+  deleteStop,
+  createStopsBulk
 };

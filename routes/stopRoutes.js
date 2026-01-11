@@ -9,5 +9,7 @@ router.post("/", authMiddleware, adminMiddleware, stopController.createStop);
 router.put("/:stopId", authMiddleware, adminMiddleware, stopController.updateStop);
 router.delete("/:stopId", authMiddleware, adminMiddleware, stopController.deleteStop);
 router.get("/", authMiddleware, stopController.getStops);
+router.post("/bulk", authMiddleware, adminMiddleware, stopController.createStopsBulk);
+
 
 module.exports = router;
