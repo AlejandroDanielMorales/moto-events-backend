@@ -60,15 +60,18 @@ const register = async (req, res) => {
       emergencyContact1,
       emergencyContact2,
       birthDate,
-      sex
+      sex,
+      avatarUrl: req.file ? req.file.path : null // 👈 foto de perfil
     });
+
 
     return res.status(201).json({
       msg: "Usuario registrado correctamente",
       user: {
         id: user._id,
         name: user.name,
-        email: user.email
+        email: user.email,
+        avatarUrl: user.avatarUrl
       }
     });
 

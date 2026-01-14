@@ -7,7 +7,7 @@ const EventSchema = new Schema({
     title: { type: String, required: true },
     description: String,
     date: { type: Date, required: true },
-    images: [String],
+    imageUrl: String,
 
     startLocation: {
         type: { type: String, enum: ['Point'], default: 'Point' },

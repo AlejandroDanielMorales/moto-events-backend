@@ -1,17 +1,49 @@
 const Event = require("../models/Event");
-const Registration = require("../models/Registration");
 
 async function createEvent(req, res) {
   try {
+    const {
+      title,
+      description,
+      date,
+      startLocation,
+      meetingAddress,
+      departTime,
+      returnTime,
+      stops
+    } = req.body;
+
+    const startLocationParsed = req.body.startLocation
+  ? JSON.parse(req.body.startLocation)
+  : null;
+
+// ahora validamos con el objeto parseado
+if (!title || !date || !departTime || !startLocationParsed || !startLocationParsed.coordinates) {
+  return res.status(400).json({
+    msg: "Título, fecha, hora de salida y ubicación inicial son obligatorios."
+  });
+}
+
     const event = await Event.create({
-      ...req.body,
-      createdBy: req.user._id
+      title,
+      description,
+      date,
+      startLocation: startLocationParsed,
+      meetingAddress,
+      departTime,
+      returnTime,
+      stops,
+      createdBy: req.user._id,
+      imageUrl: req.file ? req.file.path : null // 👈 URL Cloudinary si hay imagen
     });
-    return res.json(event);
+
+    return res.status(201).json(event);
   } catch (err) {
+    console.error(err);
     return res.status(500).json({ msg: "Error al crear evento", err });
   }
 }
+
 
 async function getEvents(req, res) {
   const events = await Event.find()

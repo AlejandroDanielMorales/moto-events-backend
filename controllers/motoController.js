@@ -2,39 +2,41 @@ const Moto = require("../models/Moto");
 
 // Crear moto (usuario autenticado)
 async function createMoto(req, res) {
-    try {
-        const {
-            brand,
-            model,
-            photoUrl,
-            year,
-            displacementCc,
-            plate,
-            color
-        } = req.body;
+  try {
+    const {
+      brand,
+      model,
+      year,
+      displacementCc,
+      plate,
+      color
+    } = req.body;
 
-        if (!brand || !model) {
-            return res.status(400).json({
-                message: "Marca y modelo son obligatorios"
-            });
-        }
-
-        const moto = await Moto.create({
-            owner: req.user.id, // 🔐 sale del token
-            brand,
-            model,
-            photoUrl,
-            year,
-            displacementCc,
-            plate,
-            color
-        });
-
-        res.status(201).json(moto);
-    } catch (err) {
-        res.status(500).json({ message: "Error al crear moto" });
+    if (!brand || !model) {
+      return res.status(400).json({
+        message: "Marca y modelo son obligatorios"
+      });
     }
+
+    const moto = await Moto.create({
+      owner: req.user.id,
+      brand,
+      model,
+      year,
+      displacementCc,
+      plate,
+      color,
+      photoUrl: req.file ? req.file.path : null // 👈 URL Cloudinary
+    });
+
+    res.status(201).json(moto);
+  } catch (err) {
+    console.error(err);
+    
+    res.status(500).json({ message: `${req.body}` });
+  }
 }
+
 
 // Obtener mis motos
 async function getMyMotos(req, res) {
@@ -68,41 +70,47 @@ async function getMotoById(req, res) {
 
 // Actualizar moto (solo dueño)
 async function updateMoto(req, res) {
-    try {
-        const allowedFields = [
-            "brand",
-            "model",
-            "photoUrl",
-            "year",
-            "displacementCc",
-            "plate",
-            "color"
-        ];
+  try {
+    const allowedFields = [
+      "brand",
+      "model",
+      "year",
+      "displacementCc",
+      "plate",
+      "color"
+    ];
 
-        const data = {};
-        allowedFields.forEach((field) => {
-            if (req.body[field] !== undefined) {
-                data[field] = req.body[field];
-            }
-        });
+    const data = {};
+    allowedFields.forEach((field) => {
+      if (req.body[field] !== undefined) {
+        data[field] = req.body[field];
+      }
+    });
 
-        const moto = await Moto.findOneAndUpdate(
-            { _id: req.params.motoId, owner: req.user.id },
-            { $set: data },
-            { new: true }
-        );
-
-        if (!moto) {
-            return res.status(404).json({
-                message: "Moto no encontrada o sin permisos"
-            });
-        }
-
-        res.json(moto);
-    } catch (err) {
-        res.status(500).json({ message: "Error al actualizar moto" });
+    // 👇 si viene imagen nueva
+    if (req.file) {
+      data.photoUrl = req.file.path;
     }
+
+    const moto = await Moto.findOneAndUpdate(
+      { _id: req.params.motoId, owner: req.user.id },
+      { $set: data },
+      { new: true }
+    );
+
+    if (!moto) {
+      return res.status(404).json({
+        message: "Moto no encontrada o sin permisos"
+      });
+    }
+
+    res.json(moto);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Error al actualizar moto" });
+  }
 }
+
 
 // Eliminar moto (solo dueño)
 async function deleteMoto(req, res) {

@@ -1,4 +1,5 @@
 // middleware/auth.js
+const jwt = require("jsonwebtoken");
 const onlyOwnerMiddleware = async (req, res, next) => {
     const token = req.header("Authorization")?.replace("Bearer ", "");
 
@@ -11,7 +12,8 @@ const onlyOwnerMiddleware = async (req, res, next) => {
         req.user = decoded; // { id, role, ... }
         next();
     } catch (err) {
-        res.status(401).json({ message: "Token inválido" });
+
+        res.status(401).json({ message: `${token}` });
     }
 };
 module.exports = { onlyOwnerMiddleware };
