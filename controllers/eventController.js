@@ -6,55 +6,75 @@ async function createEvent(req, res) {
       title,
       description,
       date,
-      startLocation,
       meetingAddress,
       departTime,
       returnTime,
-      stops
     } = req.body;
 
+    // 📍 startLocation
     const startLocationParsed = req.body.startLocation
-  ? JSON.parse(req.body.startLocation)
-  : null;
+      ? JSON.parse(req.body.startLocation)
+      : null;
 
-if (
-  !startLocationParsed ||
-  !Array.isArray(startLocationParsed.coordinates) ||
-  startLocationParsed.coordinates.length !== 2
-) {
-  return res.status(400).json({
-    msg: "Ubicación inicial inválida."
-  });
+    if (
+      !startLocationParsed ||
+      !Array.isArray(startLocationParsed.coordinates) ||
+      startLocationParsed.coordinates.length !== 2
+    ) {
+      return res.status(400).json({ msg: "Ubicación inicial inválida." });
+    }
+
+    startLocationParsed.coordinates =
+      startLocationParsed.coordinates.map(Number);
+
+    // 🛑 stops (Postman + Frontend compatible)
+
+let stopsParsed = [];
+
+if (req.body.stops) {
+  try {
+    const parsed = JSON.parse(req.body.stops);
+
+    if (Array.isArray(parsed)) {
+      stopsParsed = parsed.map(id => id.toString());
+    } else {
+      stopsParsed = [parsed.toString()];
+    }
+  } catch (e) {
+    // fallback total
+    stopsParsed = Array.isArray(req.body.stops)
+      ? req.body.stops
+      : [req.body.stops];
+  }
 }
 
-// 🔥 FORZAR NUMBERS (CLAVE)
-startLocationParsed.coordinates = startLocationParsed.coordinates.map(Number);
 
 
-// ahora validamos con el objeto parseado
-if (!title || !date || !departTime || !startLocationParsed || !startLocationParsed.coordinates) {
-  return res.status(400).json({
-    msg: "Título, fecha, hora de salida y ubicación inicial son obligatorios."
-  });
-}
-
+    // ✅ validación final
+    if (!title || !date || !departTime) {
+      return res.status(400).json({
+        msg: "Título, fecha y hora de salida son obligatorios."
+      });
+    }
     const event = await Event.create({
-      title,
-      description,
-      date,
-      startLocation: startLocationParsed,
-      meetingAddress,
-      departTime,
-      returnTime,
-      stops,
-      createdBy: req.user._id,
-      imageUrl: req.file ? req.file.path : null // 👈 URL Cloudinary si hay imagen
-    });
+  title,
+  description,
+  date,
+  startLocation: startLocationParsed,
+  meetingAddress,
+  departTime,
+  returnTime,
+  stops: stopsParsed, // 🔥 ACA
+  imageUrl: req.file ? req.file.path : null
+});
 
     return res.status(201).json(event);
   } catch (err) {
     console.error(err);
-    return res.status(500).json({ msg: "Error al crear evento", err });
+    return res.status(500).json({
+      msg: "Error al crear evento",
+      err
+    });
   }
 }
 
