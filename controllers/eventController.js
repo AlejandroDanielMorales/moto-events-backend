@@ -17,6 +17,20 @@ async function createEvent(req, res) {
   ? JSON.parse(req.body.startLocation)
   : null;
 
+if (
+  !startLocationParsed ||
+  !Array.isArray(startLocationParsed.coordinates) ||
+  startLocationParsed.coordinates.length !== 2
+) {
+  return res.status(400).json({
+    msg: "Ubicación inicial inválida."
+  });
+}
+
+// 🔥 FORZAR NUMBERS (CLAVE)
+startLocationParsed.coordinates = startLocationParsed.coordinates.map(Number);
+
+
 // ahora validamos con el objeto parseado
 if (!title || !date || !departTime || !startLocationParsed || !startLocationParsed.coordinates) {
   return res.status(400).json({
