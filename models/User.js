@@ -25,9 +25,9 @@ const UserSchema = new Schema({
         default: 'user' 
     },
 
-    avatarUrl: String,
-
-    phone: String,
+    image: { type: String, required: true },
+    phone: { 
+        type: String ,required: true},
 
     emergencyContact1: { 
         type: String, 

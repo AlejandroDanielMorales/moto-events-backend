@@ -2,7 +2,22 @@ const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
-const register = async (req, res) => {
+async function checkEmail(req, res) {
+  const { email } = req.query;
+
+  if (!email) {
+    return res.status(400).json({ exists: false });
+  }
+
+  const user = await User.findOne({ email: email.toLowerCase() });
+
+  return res.json({
+    exists: !!user
+  });
+}
+
+
+async function register(req, res) {
   try {
     const {
       name,
@@ -15,74 +30,34 @@ const register = async (req, res) => {
       sex
     } = req.body;
 
-    // Validaciones
-    if (!name || !email || !password) {
-      return res.status(400).json({
-        msg: "Nombre, email y contraseña son obligatorios."
-      });
+    if (!name || !email || !password || !emergencyContact1 || !birthDate || !sex) {
+      return res.status(400).json({ message: "Faltan campos obligatorios" });
     }
 
-    if (!emergencyContact1) {
-      return res.status(400).json({
-        msg: "El primer número de emergencia es obligatorio"
-      });
-    }
-
-    if (!birthDate || !sex) {
-      return res.status(400).json({
-        msg: "Fecha de nacimiento y sexo son obligatorios"
-      });
-    }
-
-    if (!["M", "F", "X"].includes(sex)) {
-      return res.status(400).json({
-        msg: "Sexo inválido. Use M, F o X"
-      });
-    }
-
-    // Verificar email existente
     const exists = await User.findOne({ email });
     if (exists) {
-      return res.status(400).json({
-        msg: "El email ya está registrado."
-      });
+      return res.status(400).json({ message: "El email ya está registrado" });
     }
 
-    // Hash de contraseña
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashed = await bcrypt.hash(password, 10);
 
-    // Crear usuario
     const user = await User.create({
       name,
       email,
-      password: hashedPassword,
+      password: hashed,
       phone,
       emergencyContact1,
       emergencyContact2,
       birthDate,
       sex,
-      avatarUrl: req.file ? req.file.path : null // 👈 foto de perfil
+      image: req.file ? req.file.path : null
     });
 
-
-    return res.status(201).json({
-      msg: "Usuario registrado correctamente",
-      user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        avatarUrl: user.avatarUrl
-      }
-    });
-
+    res.status(201).json(user);
   } catch (err) {
-    return res.status(500).json({
-      msg: "Error en registro",
-      error: err.message
-    });
+    res.status(500).json({ message: "Error al registrar usuario" });
   }
-};
-
+}
 
 const login = async (req, res) => {
   try {
@@ -109,5 +84,6 @@ const login = async (req, res) => {
 
 module.exports = {
   register,
-  login
+  login,
+  checkEmail
 };

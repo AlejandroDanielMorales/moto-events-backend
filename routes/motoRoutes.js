@@ -7,7 +7,6 @@ const motoCtrl = require("../controllers/motoController");
 // Crear moto con imagen (usuario autenticado)
 router.post(
   "/",
-  onlyOwnerMiddleware,
   upload.single("image"), // 👈 CLAVE
   motoCtrl.createMoto
 );
@@ -21,11 +20,6 @@ router.put(
 );
 
 // Resto sin cambios
-router.post(
-  "/add",
-  upload.single("image"),
-  motoCtrl.addMoto
-);
 router.get("/me", onlyOwnerMiddleware, motoCtrl.getMyMotos);
 router.get("/:motoId", onlyOwnerMiddleware, motoCtrl.getMotoById);
 router.delete("/:motoId", onlyOwnerMiddleware, motoCtrl.deleteMoto);

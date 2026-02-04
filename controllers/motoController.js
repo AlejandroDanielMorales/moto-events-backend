@@ -1,9 +1,15 @@
 const Moto = require("../models/Moto");
 
-// Crear moto (usuario autenticado)
 async function createMoto(req, res) {
+  console.log("🚀 createMoto → request recibida");
+
   try {
+    // 1️⃣ Log inicial del request
+    console.log("📥 BODY recibido:", req.body);
+    console.log("📷 FILE recibido:", req.file);
+
     const {
+      owner,
       brand,
       model,
       year,
@@ -12,28 +18,38 @@ async function createMoto(req, res) {
       color
     } = req.body;
 
-    if (!brand || !model) {
-      return res.status(400).json({
-        message: "Marca y modelo son obligatorios"
-      });
-    }
-
-    const moto = await Moto.create({
-      owner: req.user.id,
+    const motoData = {
+      owner,
       brand,
       model,
       year,
       displacementCc,
       plate,
       color,
-      photoUrl: req.file ? req.file.path : null // 👈 URL Cloudinary
-    });
+      image: req.file ? req.file.path : null
+    };
+
+    console.log("📦 Datos a guardar en Mongo:", motoData);
+
+    // 6️⃣ Guardar en DB
+    const moto = await Moto.create(motoData);
+
+    console.log("🎉 Moto creada con éxito:", moto._id);
 
     res.status(201).json(moto);
+
   } catch (err) {
-    console.error(err);
-    
-    res.status(500).json({ message: `${req.body}` });
+    // 7️⃣ Catch ultra descriptivo
+    console.error("❌ ERROR en createMoto");
+    console.error("🧠 Mensaje:", err.message);
+    console.error("🏷️ Nombre:", err.name);
+    console.error("🔢 Código:", err.code);
+    console.error("🧩 Errores de validación:", err.errors);
+    console.error("📚 Stack:", err.stack);
+
+    res.status(500).json({
+      message: "Error creando moto"
+    });
   }
 }
 
@@ -52,8 +68,7 @@ async function getMyMotos(req, res) {
 async function getMotoById(req, res) {
     try {
         const moto = await Moto.findOne({
-            _id: req.params.motoId,
-            owner: req.user.id
+            _id: req.params.motoId
         });
 
         if (!moto) {
@@ -89,11 +104,11 @@ async function updateMoto(req, res) {
 
     // 👇 si viene imagen nueva
     if (req.file) {
-      data.photoUrl = req.file.path;
+      data.image = req.file.path;
     }
 
     const moto = await Moto.findOneAndUpdate(
-      { _id: req.params.motoId, owner: req.user.id },
+      { _id: req.params.motoId},
       { $set: data },
       { new: true }
     );
@@ -116,8 +131,7 @@ async function updateMoto(req, res) {
 async function deleteMoto(req, res) {
     try {
         const moto = await Moto.findOneAndDelete({
-            _id: req.params.motoId,
-            owner: req.user.id
+            _id: req.params.motoId
         });
 
         if (!moto) {
@@ -139,60 +153,9 @@ async function getAllMotos(req, res) {
         res.status(500).json({ message: "Error al obtener motos" });
     }
 }
-async function addMoto(req, res) {
-    try {
-        const {
-            owner, // 👈 opcional para dev
-            brand,
-            model,
-            photoUrl,
-            year,
-            displacementCc,
-            plate,
-            color
-        } = req.body;
-
-        if (!brand || !model) {
-            return res.status(400).json({
-                message: "Marca y modelo son obligatorios"
-            });
-        }
-
-        // 🔑 Resolver owner
-        const resolvedOwner = req.user?.id || owner;
-
-        if (!resolvedOwner) {
-            return res.status(400).json({
-                message: "Owner es obligatorio"
-            });
-        }
-
-        const moto = await Moto.create({
-            owner: resolvedOwner,
-            brand,
-            model,
-            photoUrl,
-            year,
-            displacementCc,
-            plate,
-            color
-        });
-
-        res.status(201).json(moto);
-
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({
-            message: "Error al crear moto",
-            error: err.message
-        });
-    }
-}
-
 
 
 module.exports = {
-    addMoto,
     getAllMotos,
     createMoto,
     getMyMotos,
